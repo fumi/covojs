@@ -30,6 +30,12 @@ $(function() {
 				url ="http://id.ndl.go.jp/auth/ndla/?query=PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0ASELECT+%3Fx+%3Flabel+WHERE+{%0D%0A+++++++%3Fx+rdfs%3Alabel+%3Flabel.%0D%0Afilter+regex%28%3Flabel%2C+%22^" + request.term + "%22%29%0D%0A}%0D%0ALIMIT+10%0D%0A&output=json&callback=?";
 				dataType = "jsonp";
 				scriptCharset = "UTF-8";
+			} else if(request.term.match(/^lodac |^n /i)){
+				request.term = request.term.replace(/^lodac |^n /i,'');
+				request.term = encodeURI(request.term);
+				url = "http://lod.ac/sparql?query=PREFIX+luc%3A+%3Chttp%3A%2F%2Fwww.ontotext.com%2Fowlim%2Flucene%23%3E%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0ASELECT+DISTINCT+%3Fx+%3Flabel%0AWHERE+%7B%0A++GRAPH+%3Fg+%7B%0A++++%3Flabel+luc%3AmyIndex+%22*" + request.term + "*%22+.%0A++++%3Fx+rdfs%3Alabel+%3Flabel+.%0A++%7D%0A++FILTER+regex(str(%3Fx)%2C+'http%3A%2F%2Flod.ac%2Fid%2F')%0A%7D%0ALIMIT+10%0A&format=json" ;
+				dataType = "json";
+				scriptCharset = "UTF-8";
 			} else if(request.term.match(/^wiki |^w /i)){
 				request.term = request.term.replace(/^wiki |^w /i,'');
 				url = proxy_server + "proxy_wikipedia.php?q=" +request.term;
@@ -93,7 +99,7 @@ $(function() {
 						response( $.map( data, function( item ) {
 							return item.keyword;
 						}));
-					}else if(( flag == "ndl ")||( flag == "n ")){
+					}else if(( flag == "ndl ")||( flag == "lodac ")||( flag == "n ")){
 						var array = new Array();
 						for(var i=0 ; i< data.results.bindings.length ; i++){
 							array.push(data.results.bindings[i].label.value);
